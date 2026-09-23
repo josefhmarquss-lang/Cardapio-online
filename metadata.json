@@ -1,6 +1,0 @@
-{
-  "name": "Cardápio Digital - Lanchonete Dois Irmãos",
-  "description": "Demonstração mobile-first de cardápio digital moderno e interativo para a Lanchonete Dois Irmãos em Arapiraca - AL.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <radialGradient id="lg" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#d23a26"/><stop offset="1" stop-color="#8f1d12"/></radialGradient>
+    <linearGradient id="fl" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#f2b138"/><stop offset="1" stop-color="#ffe29a"/></linearGradient>
+    <path id="arcTop" d="M70 200 A130 130 0 0 1 330 200"/>
+    <path id="arcBottom" d="M58 200 A142 142 0 0 0 342 200"/>
+  </defs>
+  <circle cx="200" cy="200" r="196" fill="#fbf6ee"/>
+  <circle cx="200" cy="200" r="184" fill="url(#lg)"/>
+  <circle cx="200" cy="200" r="172" fill="none" stroke="#fbf6ee" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>
+  <text font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="40" fill="#fbf6ee" letter-spacing="6"><textPath href="#arcTop" startOffset="50%" text-anchor="middle">BRASA &amp; MASSA</textPath></text>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="21" fill="#f2b138" letter-spacing="7"><textPath href="#arcBottom" startOffset="50%" text-anchor="middle">• PIZZARIA ARTESANAL •</textPath></text>
+  <!-- fatia de pizza -->
+  <g transform="translate(200 212)">
+    <path d="M-62 -40 Q0 -64 62 -40 L0 86Z" fill="#f3cb6c"/>
+    <path d="M-66 -44 Q0 -70 66 -44 L62 -32 Q0 -56 -62 -32Z" fill="#d49549"/>
+    <circle cx="-18" cy="-18" r="11" fill="#b8321f"/><circle cx="20" cy="-14" r="10" fill="#b8321f"/><circle cx="0" cy="22" r="10" fill="#b8321f"/>
+    <path d="M18 18 C24 10 34 12 36 18 C30 24 22 24 18 18Z" fill="#2f7a35"/>
+  </g>
+  <!-- chama -->
+  <path d="M200 88 C214 110 236 118 226 146 C222 158 212 164 200 166 C188 164 178 158 174 146 C168 128 180 120 184 104 C190 114 194 118 200 88Z" fill="url(#fl)"/>
+  <path d="M200 124 C206 134 214 140 210 152 C206 160 194 160 190 152 C188 144 196 138 200 124Z" fill="#d23a26" opacity=".6"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"><defs><radialGradient id="dbg" cx="50%" cy="35%" r="80%"><stop offset="0" stop-color="#3a2a24"/><stop offset="1" stop-color="#120b08"/></radialGradient>
+  <filter id="dsh"><feGaussianBlur stdDeviation="10"/></filter></defs><rect width="640" height="640" fill="url(#dbg)"/>
+  <ellipse cx="320" cy="360" rx="270" ry="200" fill="#000" opacity=".4" filter="url(#dsh)"/>
+  <ellipse cx="320" cy="345" rx="265" ry="195" fill="#f4f1ea"/><ellipse cx="320" cy="345" rx="200" ry="145" fill="#fbf9f4" stroke="#e5e0d4" stroke-width="3"/>
+  <path d="M190 290 L400 260 L470 330 L260 368Z" fill="#3b1f13"/><path d="M260 368 L470 330 L470 395 L260 440Z" fill="#2a150c"/><path d="M190 290 L260 368 L260 440 L190 360Z" fill="#331a0f"/>
+  <path d="M215 300 L390 276 L440 326 L270 352Z" fill="#4c2a1a"/>
+  <path d="M230 290 C260 320 290 280 320 310 C350 340 380 300 410 320" stroke="#6b3a24" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M300 300 C300 340 290 380 296 420" stroke="#5a2e1a" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <ellipse cx="330" cy="255" rx="58" ry="45" fill="#fff8e7"/><ellipse cx="318" cy="243" rx="26" ry="14" fill="#fff"/>
+  <path d="M300 230 C320 250 340 220 360 240" stroke="#5a2e1a" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <rect x="200" y="410" width="7" height="7" fill="#e3c08e" transform="rotate(0 204 414)"/><rect x="226" y="420" width="7" height="7" fill="#e3c08e" transform="rotate(17 230 424)"/><rect x="252" y="430" width="7" height="7" fill="#e3c08e" transform="rotate(34 256 434)"/><rect x="278" y="410" width="7" height="7" fill="#e3c08e" transform="rotate(51 282 414)"/><rect x="304" y="420" width="7" height="7" fill="#e3c08e" transform="rotate(68 308 424)"/><rect x="330" y="430" width="7" height="7" fill="#e3c08e" transform="rotate(85 334 434)"/><rect x="356" y="410" width="7" height="7" fill="#e3c08e" transform="rotate(102 360 414)"/><rect x="382" y="420" width="7" height="7" fill="#e3c08e" transform="rotate(119 386 424)"/><rect x="408" y="430" width="7" height="7" fill="#e3c08e" transform="rotate(136 412 434)"/><rect x="434" y="410" width="7" height="7" fill="#e3c08e" transform="rotate(153 438 414)"/></svg>
