@@ -33,7 +33,7 @@ try {
   const p = await ctx.newPage();
   p.on("pageerror", (e) => errors.push(e.message));
   await p.goto(BASE + "/", { waitUntil: "networkidle" });
-  check((await p.getByText("Testar 7 dias grátis").count()) > 0, "página de vendas mostra 'Testar 7 dias grátis'");
+  check((await p.getByText("Testar 3 dias grátis").count()) > 0, "página de vendas mostra 'Testar 3 dias grátis'");
 
   // ---------- cadastro ----------
   await p.goto(BASE + "/assinar?plano=essencial", { waitUntil: "networkidle" });
@@ -57,7 +57,7 @@ try {
 
   const cust = fake.state.customers.at(-1);
   const sub = fake.state.subscriptions.at(-1);
-  const due = new Date(Date.now() - 3 * 3600_000 + 7 * 86400_000).toISOString().slice(0, 10);
+  const due = new Date(Date.now() - 3 * 3600_000 + 3 * 86400_000).toISOString().slice(0, 10);
   check(cust?.cpfCnpj === "52998224725" && cust?.email === email, "cliente criado no Asaas com CPF e e-mail");
   check(sub?.value === 79.9 && sub?.nextDueDate === due && sub?.billingType === "UNDEFINED", `assinatura R$ 79,90 com 1º vencimento em ${due}`);
   check(fake.state.requests.every((r) => r.path.startsWith("/__") || r.ua), "todas as chamadas enviam User-Agent");

@@ -12,4 +12,4 @@ export function isPlanId(v: unknown): v is PlanId {
   return typeof v === "string" && v in PLANS;
 }
 
-export const TRIAL_DAYS = Math.max(0, Number(process.env.TRIAL_DAYS ?? 7) || 0);
+export const TRIAL_DAYS = Math.max(0, Number(process.env.TRIAL_DAYS ?? 3) || 0);

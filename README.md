@@ -94,7 +94,7 @@ As duas formas funcionam juntas.
 
 **Como funciona**
 - Planos e preços: `src/lib/plans.ts` (Essencial R$ 79,90 até 60 produtos; Profissional R$ 139,90).
-- `TRIAL_DAYS` dias grátis (padrão 7). A 1ª mensalidade vence no fim do teste.
+- `TRIAL_DAYS` dias grátis (padrão 3). A 1ª mensalidade vence no fim do teste.
 - A cada mês o Asaas gera a fatura e avisa o cliente por e-mail. No painel, em
   **Assinatura**, o lojista vê a fatura, paga, muda de plano ou cancela.
 - Pagou: acesso até o vencimento + 1 mês. Venceu: 3 dias de tolerância com aviso; depois o
@@ -120,7 +120,7 @@ O conteúdo do aviso nunca é usado diretamente: o sistema sempre confere no Asa
 
 **Enquanto `ASAAS_ENV=sandbox`**, a página de vendas continua com "Falar com a gente" e o
 cadastro fica acessível só pelo link direto `/assinar` (com um aviso de ambiente de teste). Com
-`ASAAS_ENV=production`, os botões "Testar 7 dias grátis" aparecem na página de vendas.
+`ASAAS_ENV=production`, os botões "Testar 3 dias grátis" aparecem na página de vendas.
 
 **Testes sem dinheiro real**: use `ASAAS_ENV=sandbox` com a chave de uma conta criada em
 sandbox.asaas.com. Lá dá para simular o pagamento das faturas. Para ir para produção, troque
