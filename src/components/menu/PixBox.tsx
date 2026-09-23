@@ -29,12 +29,15 @@ export function PixBox({ store, amountCents, txid }: { store: PixStore; amountCe
   const [generatedQr, setGeneratedQr] = useState<string | null>(null);
   const [copied, setCopied] = useState<"code" | "key" | null>(null);
 
+  // Com chave cadastrada, o QR Code é gerado com o valor exato do pedido.
+  // A imagem enviada pela loja (geralmente sem valor) só é usada quando não há chave.
   useEffect(() => {
-    if (store.pix_qr_url || !payload) return;
+    if (!payload) return;
     QRCode.toDataURL(payload, { margin: 1, width: 360, errorCorrectionLevel: "M" }).then(setGeneratedQr, () => setGeneratedQr(null));
-  }, [payload, store.pix_qr_url]);
+  }, [payload]);
 
-  const qr = store.pix_qr_url || generatedQr;
+  const qr = payload ? generatedQr : store.pix_qr_url;
+  const amountInQr = !!payload && !!amountCents;
   const keyType = PIX_KEY_TYPES.find((t) => t.value === store.pix_key_type)?.label;
 
   async function copy(text: string, what: "code" | "key") {
@@ -55,8 +58,17 @@ export function PixBox({ store, amountCents, txid }: { store: PixStore; amountCe
   return (
     <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
       <div className="flex items-center gap-2 font-bold text-emerald-900">
-        <PixLogo /> Pagamento via Pix {amountCents ? <span className="ml-auto tabular-nums">{money(amountCents)}</span> : null}
+        <PixLogo /> Pagamento via Pix
       </div>
+      {amountCents ? (
+        <div className="mt-3 rounded-xl bg-white p-3 text-center ring-1 ring-emerald-200">
+          <div className="text-xs font-semibold uppercase tracking-wide text-emerald-800/70">Valor a pagar</div>
+          <div className="text-2xl font-extrabold tabular-nums text-emerald-900">{money(amountCents)}</div>
+          <div className="mt-0.5 text-xs text-stone-500">
+            {amountInQr ? "O QR Code e o copia e cola já vêm com este valor." : "Digite exatamente este valor no app do seu banco."}
+          </div>
+        </div>
+      ) : null}
       <div className="mt-3 flex flex-col items-center gap-3 sm:flex-row sm:items-start">
         {qr && (
            
@@ -70,6 +82,7 @@ export function PixBox({ store, amountCents, txid }: { store: PixStore; amountCe
                 <span className="truncate">{store.pix_key}</span>
                 {copied === "key" ? <Check className="size-4 shrink-0 text-emerald-600" /> : <Copy className="size-4 shrink-0 text-stone-400" />}
               </button>
+              {amountCents ? <div className="mt-1 text-xs text-stone-500">Pagando pela chave, digite o valor de {money(amountCents)}.</div> : null}
             </div>
           )}
           {store.pix_receiver_name && (
@@ -77,7 +90,7 @@ export function PixBox({ store, amountCents, txid }: { store: PixStore; amountCe
               <span className="text-stone-500">Recebedor:</span> <strong>{store.pix_receiver_name}</strong>
             </p>
           )}
-          {payload && !store.pix_qr_url && (
+          {payload && (
             <button onClick={() => copy(payload, "code")} className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2.5 font-semibold text-white hover:bg-emerald-700">
               {copied === "code" ? <Check className="size-4" /> : <Copy className="size-4" />}
               {copied === "code" ? "Código copiado!" : "Copiar Pix copia e cola"}

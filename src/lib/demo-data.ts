@@ -349,7 +349,7 @@ export const DEMO_STORE: Partial<Store> = {
   pix_key: "pix@brasaemassa.exemplo",
   pix_key_type: "email",
   pix_receiver_name: "Brasa e Massa Pizzaria",
-  pix_qr_url: "/demo/qrcode-exemplo.svg",
+  pix_qr_url: null,
   payment_instructions:
     "Pague via Pix e envie o comprovante pelo WhatsApp. O pedido entra em preparo após a confirmação do pagamento pela pizzaria.",
 };

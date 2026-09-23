@@ -57,13 +57,13 @@ export function PaymentForm({ store }: { store: Store }) {
                 </div>
               </div>
               <div>
-                <span className="label">Imagem do QR Code (opcional)</span>
+                <span className="label">Imagem do QR Code (opcional — só é usada se não houver chave)</span>
                 <ImageInput
                   value={v.pix_qr_url}
                   onChange={(u) => f.set("pix_qr_url", u)}
                   maxSide={800}
                   label="Enviar QR Code"
-                  hint="Envie o QR Code gerado no app do seu banco. Sem imagem, geramos um QR Code Pix automaticamente a partir da chave, já com o valor do pedido."
+                  hint="Com a chave Pix preenchida, o cliente recebe um QR Code gerado automaticamente com o valor exato de cada pedido — recomendado. A imagem só aparece para lojas sem chave cadastrada, e nesse caso o cliente digita o valor."
                 />
               </div>
               <div>
