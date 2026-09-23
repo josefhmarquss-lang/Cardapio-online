@@ -7,6 +7,7 @@ import { buildWhatsappMessage, whatsappLink } from "@/lib/order-message";
 import type { Order, OrderStatus } from "@/lib/types";
 import { WhatsIcon } from "./CartSheet";
 import { PixBox } from "./PixBox";
+import { ReceiptButton } from "./ReceiptButton";
 import type { PublicStore } from "./types";
 
 const FLOW: OrderStatus[] = ["new", "received", "preparing", "out_for_delivery", "completed"];
@@ -133,8 +134,9 @@ export function OrderTracker({ store, order }: { store: PublicStore; order: Orde
       </div>
 
       {order.payment_method === "pix" && status !== "cancelled" && status !== "completed" && (store.pix_key || store.pix_qr_url) && (
-        <div className="mt-4">
+        <div className="mt-4 space-y-4">
           <PixBox store={store} amountCents={order.total_cents} txid={`PED${order.number}`} />
+          <ReceiptButton store={store} order={order} />
         </div>
       )}
     </div>

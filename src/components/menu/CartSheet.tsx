@@ -8,6 +8,7 @@ import type { Fulfillment, Order, PaymentMethod, Product } from "@/lib/types";
 import { Sheet } from "@/components/ui/Sheet";
 import { optionLabels, unitPrice } from "./cart-utils";
 import { PixBox, PixLogo } from "./PixBox";
+import { ReceiptButton } from "./ReceiptButton";
 import type { CartLine, PublicStore } from "./types";
 
 type Customer = {
@@ -419,6 +420,7 @@ function Done({ store, order }: { store: PublicStore; order: Order }) {
   useEffect(() => setOrigin(window.location.origin), []);
   const message = buildWhatsappMessage(store.name, order, origin ? origin + trackPath : undefined);
   const hasWhats = onlyDigits(store.whatsapp).length >= 10;
+  const showPix = order.payment_method === "pix" && !!(store.pix_key || store.pix_qr_url);
 
   return (
     <div className="space-y-5 px-5 py-6">
@@ -428,7 +430,16 @@ function Done({ store, order }: { store: PublicStore; order: Order }) {
         </div>
         <h3 className="mt-3 text-xl font-extrabold">Pedido #{order.number} registrado</h3>
         <p className="mt-1 text-stone-600">
-          Agora envie o pedido pelo WhatsApp. <strong>{store.name}</strong> vai conferir e confirmar o recebimento.
+          {showPix ? (
+            <>
+              Agora: <strong>1)</strong> envie o pedido pelo WhatsApp, <strong>2)</strong> pague o Pix e <strong>3)</strong> mande o comprovante.{" "}
+              <strong>{store.name}</strong> vai conferir e confirmar.
+            </>
+          ) : (
+            <>
+              Agora envie o pedido pelo WhatsApp. <strong>{store.name}</strong> vai conferir e confirmar o recebimento.
+            </>
+          )}
         </p>
         <p className="mx-auto mt-3 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-800">
           <Clock className="size-4" /> Aguardando confirmação da loja
@@ -446,8 +457,11 @@ function Done({ store, order }: { store: PublicStore; order: Order }) {
         </a>
       )}
 
-      {order.payment_method === "pix" && (store.pix_key || store.pix_qr_url) && (
-        <PixBox store={store} amountCents={order.total_cents} txid={`PED${order.number}`} />
+      {showPix && (
+        <>
+          <PixBox store={store} amountCents={order.total_cents} txid={`PED${order.number}`} />
+          <ReceiptButton store={store} order={order} />
+        </>
       )}
 
       <div className="rounded-xl bg-stone-50 p-4 text-sm">

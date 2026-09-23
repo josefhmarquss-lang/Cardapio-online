@@ -32,6 +32,7 @@ export function buildWhatsappMessage(storeName: string, order: Order, trackUrl?:
   let pay = `*Pagamento:* ${PAYMENT_LABEL[order.payment_method]}`;
   if (order.payment_method === "cash" && order.change_for_cents) pay += ` — troco para ${money(order.change_for_cents)}`;
   L.push(pay);
+  if (order.payment_method === "pix") L.push("_Vou enviar o comprovante do Pix logo em seguida nesta conversa._");
   if (order.notes) L.push(`*Observações:* ${order.notes}`);
   if (trackUrl) {
     L.push("");
@@ -40,6 +41,17 @@ export function buildWhatsappMessage(storeName: string, order: Order, trackUrl?:
   L.push("");
   L.push("Aguardo a confirmação do pedido. Obrigado!");
   return L.join("\n");
+}
+
+/** Mensagem que acompanha o comprovante do Pix (o cliente anexa o print na conversa). */
+export function buildReceiptMessage(storeName: string, order: Order): string {
+  return [
+    `Olá, ${storeName}! Segue o *comprovante do Pix* do pedido *#${order.number}*.`,
+    `Valor pago: *${money(order.total_cents)}*`,
+    `Cliente: ${order.customer_name}`,
+    "",
+    "📎 (comprovante em anexo)",
+  ].join("\n");
 }
 
 export function whatsappLink(phone: string, text: string): string {
