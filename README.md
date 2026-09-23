@@ -24,7 +24,7 @@ Requisitos: **Node.js 20.9 ou superior** (recomendado 22 LTS).
 ```bash
 npm install
 cp .env.example .env        # ajuste e-mail e senha do superadministrador
-npm run seed                # cria a pizzaria demo e a sua conta de superadmin
+npm run seed                # opcional: o servidor também faz isso ao iniciar
 npm run dev                 # http://localhost:3000
 ```
 
@@ -141,11 +141,12 @@ serviço externo de banco ou autenticação. Por isso ele precisa de um servidor
 - **Railway** (já configurado em `railway.json`): New Project → Deploy from GitHub
   repo; adicione um **Volume** montado em `/data`; em Variables defina
   `DATABASE_PATH=/data/cardapio.db`, `SUPERADMIN_EMAIL`, `SUPERADMIN_PASSWORD` e
-  `NEXT_PUBLIC_SALES_WHATSAPP`; em Networking gere um domínio. O start roda
-  `npm run seed && npm start` (o seed não altera lojas existentes, mas redefine a
-  senha do superadmin para o valor da variável a cada reinício).
+  `NEXT_PUBLIC_SALES_WHATSAPP`; em Networking gere um domínio. Ao iniciar, o
+  servidor prepara o banco sozinho (cria a demo e o superadmin se faltarem; não altera
+  lojas existentes, mas redefine a senha do superadmin para o valor da variável a cada
+  reinício).
 - **Render / Fly.io**: crie um disco persistente, aponte `DATABASE_PATH` para ele,
-  build `npm run build`, start `npm run seed && npm start`.
+  build `npm run build`, start `npm start`.
 - **Vercel/Netlify (serverless) não servem** com SQLite: o disco é apagado a cada
   execução. Para usar essas plataformas seria preciso trocar o banco por um
   Postgres gerenciado (as consultas estão isoladas em `src/lib/repo/`).
