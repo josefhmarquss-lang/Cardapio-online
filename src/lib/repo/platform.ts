@@ -129,3 +129,31 @@ export function createSuperadmin(email: string, name: string, password: string) 
   }
   d.prepare("INSERT INTO users (email, name, password_hash, role) VALUES (?, ?, ?, 'superadmin')").run(email.toLowerCase(), name, hash);
 }
+
+// ---------- administradores da plataforma ----------
+
+export function listSuperadmins() {
+  return db()
+    .prepare("SELECT id, email, name, created_at FROM users WHERE role = 'superadmin' ORDER BY id")
+    .all() as { id: number; email: string; name: string; created_at: string }[];
+}
+
+/** Cadastro pelo painel: não sobrescreve contas existentes. */
+export function addSuperadmin(email: string, name: string, password: string) {
+  const d = db();
+  if (d.prepare("SELECT 1 FROM users WHERE email = ?").get(email.trim())) throw new HttpError(409, "Já existe uma conta com este e-mail.");
+  d.prepare("INSERT INTO users (email, name, password_hash, role) VALUES (?, ?, ?, 'superadmin')").run(
+    email.trim().toLowerCase(),
+    name.trim(),
+    bcrypt.hashSync(password, 12),
+  );
+}
+
+export function removeSuperadmin(id: number, requesterId: number) {
+  if (id === requesterId) throw new HttpError(400, "Você não pode remover a sua própria conta.");
+  const d = db();
+  const row = d.prepare("SELECT role FROM users WHERE id = ?").get(id) as { role: string } | undefined;
+  if (!row || row.role !== "superadmin") throw new HttpError(404, "Administrador não encontrado.");
+  // as sessões são apagadas junto (ON DELETE CASCADE)
+  d.prepare("DELETE FROM users WHERE id = ? AND role = 'superadmin'").run(id);
+}

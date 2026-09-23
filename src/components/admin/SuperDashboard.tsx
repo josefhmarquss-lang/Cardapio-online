@@ -5,6 +5,7 @@ import { useState } from "react";
 import { BRAND } from "@/lib/brand";
 import { slugifyClient } from "./slug";
 import { api } from "./api";
+import { SuperAdmins, MyPassword } from "./SuperAdmins";
 import { PageHeader, Section, ToastProvider, useToast } from "./ui";
 
 type Row = {
@@ -20,7 +21,9 @@ type Row = {
   orders: number;
 };
 
-export function SuperDashboard(props: { email: string; initial: Row[] }) {
+type AdminRow = { id: number; email: string; name: string; created_at: string };
+
+export function SuperDashboard(props: { email: string; myId: number; initial: Row[]; admins: AdminRow[] }) {
   return (
     <ToastProvider>
       <Inner {...props} />
@@ -28,7 +31,7 @@ export function SuperDashboard(props: { email: string; initial: Row[] }) {
   );
 }
 
-function Inner({ email, initial }: { email: string; initial: Row[] }) {
+function Inner({ email, myId, initial, admins }: { email: string; myId: number; initial: Row[]; admins: AdminRow[] }) {
   const [rows, setRows] = useState(initial);
   const [form, setForm] = useState({ name: "", slug: "", owner_name: "", owner_email: "", owner_password: "", whatsapp: "", template: "blank" as "blank" | "pizzaria" });
   const [slugTouched, setSlugTouched] = useState(false);
@@ -158,6 +161,7 @@ function Inner({ email, initial }: { email: string; initial: Row[] }) {
             )}
           </div>
 
+          <div className="space-y-6">
           <Section title="Nova loja" description="Cria o cardápio e o login do dono.">
             <form onSubmit={create} className="space-y-3">
               {input("name", "Nome do estabelecimento", { required: true, maxLength: 80, placeholder: "Ex.: Lanchonete do Zé" })}
@@ -196,6 +200,9 @@ function Inner({ email, initial }: { email: string; initial: Row[] }) {
               </p>
             </form>
           </Section>
+          <SuperAdmins initial={admins} myId={myId} />
+          <MyPassword />
+          </div>
         </div>
       </main>
     </div>
