@@ -35,7 +35,7 @@ if (!d.prepare("SELECT 1 FROM stores WHERE slug = ?").get(DEMO_SLUG)) {
     template: "pizzaria",
   });
   console.log(`✔ Pizzaria de demonstração criada: /${DEMO_SLUG}`);
-  console.log(`  Painel: ${demoEmail} / ${demoPassword}`);
+  console.log(`  Painel: ${demoEmail}${process.env.DEMO_OWNER_PASSWORD ? "" : ` / ${demoPassword}`}`);
 } else {
   console.log(`• Pizzaria de demonstração já existe (/${DEMO_SLUG}).`);
 }
@@ -45,8 +45,12 @@ if (!hasSuper || process.env.SUPERADMIN_PASSWORD) {
   const email = process.env.SUPERADMIN_EMAIL || "super@cardapio.local";
   const password = process.env.SUPERADMIN_PASSWORD || crypto.randomBytes(9).toString("base64url");
   createSuperadmin(email, "Administrador da plataforma", password);
-  console.log(`✔ Superadministrador: ${email} / ${password}`);
-  if (!process.env.SUPERADMIN_PASSWORD) console.log("  (senha gerada aleatoriamente — anote agora, ela não será exibida de novo)");
+  if (process.env.SUPERADMIN_PASSWORD) {
+    console.log(`✔ Superadministrador: ${email} (senha definida em SUPERADMIN_PASSWORD)`);
+  } else {
+    console.log(`✔ Superadministrador: ${email} / ${password}`);
+    console.log("  (senha gerada aleatoriamente — anote agora, ela não será exibida de novo)");
+  }
 } else {
   console.log("• Superadministrador já existe (defina SUPERADMIN_PASSWORD para redefinir).");
 }
