@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "./db";
 import { HttpError } from "./http";
+import { storeIsOperational } from "./repo/billing";
 import type { SessionUser } from "./types";
 
 export const SESSION_COOKIE = "cardapio_session";
@@ -86,10 +87,12 @@ export async function getSessionUser(): Promise<SessionUser | null> {
  * Para APIs do painel: exige dono de loja autenticado e devolve o ID da loja
  * vinculado à conta. O ID nunca vem da URL ou do corpo da requisição.
  */
-export async function requireOwner(): Promise<{ user: SessionUser; storeId: number }> {
+export async function requireOwner(opts: { allowLocked?: boolean } = {}): Promise<{ user: SessionUser; storeId: number }> {
   const user = await getSessionUser();
   if (!user) throw new HttpError(401, "Sessão expirada. Entre novamente.");
   if (user.role !== "owner" || !user.store_id) throw new HttpError(403, "Acesso negado.");
+  if (!opts.allowLocked && !(await storeIsOperational(user.store_id)))
+    throw new HttpError(402, "Sua assinatura está vencida. Regularize em Assinatura para voltar a usar o painel.");
   return { user, storeId: user.store_id };
 }
 

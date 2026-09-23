@@ -146,4 +146,21 @@ CREATE TABLE IF NOT EXISTS images (
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 CREATE INDEX IF NOT EXISTS idx_images_store ON images(store_id);
+
+-- Assinatura da loja. Sem linha aqui = cobrança manual, plano Profissional.
+CREATE TABLE IF NOT EXISTS store_billing (
+  store_id              INTEGER PRIMARY KEY REFERENCES stores(id) ON DELETE CASCADE,
+  mode                  TEXT NOT NULL DEFAULT 'manual' CHECK (mode IN ('manual','asaas')),
+  plan                  TEXT NOT NULL DEFAULT 'profissional',
+  trial_ends_at         TEXT,
+  paid_until            TEXT,
+  asaas_customer_id     TEXT,
+  asaas_subscription_id TEXT,
+  canceled_at           TEXT,
+  open_payment          TEXT,
+  payments              TEXT NOT NULL DEFAULT '[]',
+  synced_at             TEXT,
+  updated_at            TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+CREATE INDEX IF NOT EXISTS idx_billing_subscription ON store_billing(asaas_subscription_id);
 `;

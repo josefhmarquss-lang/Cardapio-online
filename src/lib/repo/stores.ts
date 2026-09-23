@@ -118,6 +118,11 @@ export const RESERVED_SLUGS = new Set([
   "sitemap.xml",
   "pedido",
   "assets",
+  "assinar",
+  "assinatura",
+  "cadastro",
+  "entrar",
+  "planos",
 ]);
 
 export function slugify(s: string): string {

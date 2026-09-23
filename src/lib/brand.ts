@@ -1,3 +1,7 @@
+import { PLANS } from "./plans";
+
+const price = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
+
 /** Identidade do SEU produto (a plataforma que você vende). Altere à vontade. */
 export const BRAND = {
   name: "Cardápio Pronto",
@@ -6,25 +10,28 @@ export const BRAND = {
   /** WhatsApp comercial (para os botões "Quero para minha loja"). Configure em .env */
   salesWhatsapp: process.env.NEXT_PUBLIC_SALES_WHATSAPP || "",
   demoSlug: "brasa-e-massa",
-  /** Planos exibidos na página comercial — ajuste aos seus preços reais. */
+  /** Planos exibidos na página comercial. Preços e limites ficam em src/lib/plans.ts. */
   plans: [
     {
+      id: "essencial" as const,
       name: "Essencial",
-      price: "R$ 79,90",
+      price: price(PLANS.essencial.price_cents),
       period: "/mês",
       description: "Para começar a vender online.",
       features: ["Cardápio com sua marca", "Pedidos pelo WhatsApp", "Até 60 produtos", "Painel de pedidos"],
       highlight: false,
     },
     {
+      id: "profissional" as const,
       name: "Profissional",
-      price: "R$ 139,90",
+      price: price(PLANS.profissional.price_cents),
       period: "/mês",
       description: "Tudo para a operação de delivery.",
       features: ["Produtos ilimitados", "Taxa de entrega por bairro", "QR Code Pix automático", "Alerta sonoro de pedidos", "Suporte prioritário"],
       highlight: true,
     },
     {
+      id: null,
       name: "Redes",
       price: "Sob consulta",
       period: "",

@@ -11,7 +11,9 @@ import {
   ShieldCheck,
   Smartphone,
 } from "lucide-react";
+import { asaasLive } from "@/lib/asaas";
 import { BRAND } from "@/lib/brand";
+import { TRIAL_DAYS } from "@/lib/plans";
 import { whatsappNumber } from "@/lib/format";
 
 const FEATURES = [
@@ -42,8 +44,13 @@ const FAQ = [
   ["Meus dados ficam separados das outras lojas?", "Sim. Cada estabelecimento tem login próprio e acesso somente aos próprios produtos, pedidos e configurações."],
 ];
 
+// lê a configuração de pagamentos a cada acesso
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   const demo = `/${BRAND.demoSlug}`;
+  const signup = asaasLive();
+  const trialLabel = TRIAL_DAYS > 0 ? `Testar ${TRIAL_DAYS} dias grátis` : "Criar meu cardápio";
   const sales = BRAND.salesWhatsapp
     ? `https://wa.me/${whatsappNumber(BRAND.salesWhatsapp)}?text=${encodeURIComponent(`Olá! Quero um cardápio digital para minha loja.`)}`
     : "#planos";
@@ -95,8 +102,8 @@ export default function Home() {
               <a href={demo} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-orange-600 px-6 py-4 font-bold text-white shadow-lg shadow-orange-900/40 transition hover:bg-orange-500">
                 Ver cardápio de demonstração <ArrowRight className="size-5" />
               </a>
-              <a href={sales} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-6 py-4 font-bold ring-1 ring-white/25 transition hover:bg-white/20">
-                Quero para minha loja
+              <a href={signup ? "/assinar" : sales} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white/10 px-6 py-4 font-bold ring-1 ring-white/25 transition hover:bg-white/20">
+                {signup ? trialLabel : "Quero para minha loja"}
               </a>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-stone-300">
@@ -255,9 +262,17 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <a href={sales} className={`mt-7 rounded-2xl py-3 text-center font-bold transition ${p.highlight ? "bg-orange-600 text-white hover:bg-orange-500" : "bg-stone-900 text-white hover:bg-stone-800"}`}>
-                  Falar com a gente
+                <a
+                  href={signup && p.id ? `/assinar?plano=${p.id}` : sales}
+                  className={`mt-7 rounded-2xl py-3 text-center font-bold transition ${p.highlight ? "bg-orange-600 text-white hover:bg-orange-500" : "bg-stone-900 text-white hover:bg-stone-800"}`}
+                >
+                  {signup && p.id ? trialLabel : "Falar com a gente"}
                 </a>
+                {signup && p.id && sales !== "#planos" && (
+                  <a href={sales} className={`mt-2 text-center text-sm underline underline-offset-2 ${p.highlight ? "text-stone-400" : "text-stone-500"}`}>
+                    ou fale com a gente
+                  </a>
+                )}
               </div>
             ))}
           </div>
@@ -292,8 +307,8 @@ export default function Home() {
             <a href={demo} className="rounded-2xl bg-white px-6 py-4 font-bold text-orange-700 hover:bg-orange-50">
               Abrir demonstração
             </a>
-            <a href={sales} className="rounded-2xl bg-orange-700 px-6 py-4 font-bold hover:bg-orange-800">
-              Quero para minha loja
+            <a href={signup ? "/assinar" : sales} className="rounded-2xl bg-orange-700 px-6 py-4 font-bold hover:bg-orange-800">
+              {signup ? trialLabel : "Quero para minha loja"}
             </a>
           </div>
         </div>

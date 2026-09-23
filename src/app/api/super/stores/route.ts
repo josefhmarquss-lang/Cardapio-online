@@ -17,10 +17,11 @@ const schema = z.object({
   owner_password: passwordSchema,
   whatsapp: z.string().trim().regex(/^[\d\s()+-]{0,20}$/).optional(),
   template: z.enum(["blank", "pizzaria"]).default("blank"),
+  plan: z.enum(["essencial", "profissional"]).default("profissional"),
 });
 
 export const POST = route(async (req) => {
   await requireSuperadmin();
-  const input = schema.parse(await readJson(req));
-  return json(createStoreWithOwner(input), { status: 201 });
+  const { plan, ...input } = schema.parse(await readJson(req));
+  return json(createStoreWithOwner({ ...input, billing: { mode: "manual", plan } }), { status: 201 });
 });

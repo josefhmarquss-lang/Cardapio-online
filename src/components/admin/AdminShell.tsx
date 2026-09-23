@@ -5,6 +5,8 @@ import {
   BellOff,
   Bike,
   ClipboardList,
+  CreditCard,
+  Lock,
   ExternalLink,
   LayoutGrid,
   LogOut,
@@ -20,6 +22,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { BRAND } from "@/lib/brand";
+import { formatYmd, type BillingState } from "@/lib/billing-state";
 import { api } from "./api";
 import { ToastProvider } from "./ui";
 
@@ -31,6 +34,7 @@ const NAV = [
   { href: "/admin/loja", label: "Loja e horários", icon: Store },
   { href: "/admin/entrega", label: "Entrega e retirada", icon: Bike },
   { href: "/admin/pagamento", label: "Pagamento e Pix", icon: QrCode },
+  { href: "/admin/assinatura", label: "Assinatura", icon: CreditCard },
   { href: "/admin/conta", label: "Minha conta", icon: UserCog },
 ];
 
@@ -74,10 +78,12 @@ export function AdminShell({
   children,
   user,
   store,
+  billing,
 }: {
   children: React.ReactNode;
   user: { name: string; email: string };
   store: { name: string; slug: string; logo_url: string | null; sound_enabled: boolean };
+  billing: { state: BillingState; canceled: boolean; dueDate: string | null };
 }) {
   const path = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -254,7 +260,10 @@ export function AdminShell({
           )}
 
           <main className="lg:pl-64">
-            <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</div>
+            <BillingBanner billing={billing} path={path} />
+            <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+              {billing.state.kind === "locked" && !UNLOCKED_PATHS.includes(path) ? <LockedScreen /> : children}
+            </div>
           </main>
 
           {sound && !audioReady && (
@@ -285,5 +294,63 @@ export function AdminShell({
         </div>
       </PulseCtx.Provider>
     </ToastProvider>
+  );
+}
+
+const UNLOCKED_PATHS = ["/admin/assinatura", "/admin/conta"];
+
+function BillingBanner({ billing, path }: { billing: { state: BillingState; canceled: boolean; dueDate: string | null }; path: string }) {
+  const s = billing.state;
+  if (path === "/admin/assinatura") return null;
+  let tone = "";
+  let text: React.ReactNode = null;
+  if (s.kind === "trial") {
+    tone = "bg-sky-50 text-sky-900 border-sky-200";
+    text = (
+      <>
+        <strong>Teste grátis:</strong> {s.daysLeft === 0 ? "termina hoje" : s.daysLeft === 1 ? "termina amanhã" : `faltam ${s.daysLeft} dias`}.{" "}
+        {billing.canceled ? "Sua assinatura foi cancelada." : `A primeira mensalidade vence em ${formatYmd(billing.dueDate ?? s.until)}.`}
+      </>
+    );
+  } else if (s.kind === "active" && s.daysLeft <= 3 && billing.dueDate) {
+    tone = "bg-amber-50 text-amber-900 border-amber-200";
+    text = <>Sua mensalidade vence em {formatYmd(billing.dueDate)}.</>;
+  } else if (s.kind === "grace") {
+    tone = "bg-red-50 text-red-900 border-red-200";
+    text = (
+      <>
+        <strong>Mensalidade em atraso.</strong> Pague até {formatYmd(s.lockOn)} para o seu cardápio não ser pausado.
+      </>
+    );
+  } else if (s.kind === "locked") {
+    tone = "bg-red-600 text-white border-red-700";
+    text = <strong>Seu cardápio está pausado por falta de pagamento.</strong>;
+  }
+  if (!text) return null;
+  return (
+    <div className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-2.5 text-center text-sm ${tone}`}>
+      <span>{text}</span>
+      <Link href="/admin/assinatura" className="font-bold underline underline-offset-2">
+        Ver assinatura
+      </Link>
+    </div>
+  );
+}
+
+function LockedScreen() {
+  return (
+    <div className="card mx-auto mt-10 max-w-lg p-8 text-center">
+      <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600">
+        <Lock className="size-7" />
+      </div>
+      <h1 className="mt-4 text-xl font-extrabold">Painel pausado</h1>
+      <p className="mt-2 text-stone-600">
+        A mensalidade está em aberto e o seu cardápio foi pausado. Assim que o pagamento for confirmado, tudo volta a funcionar
+        normalmente — seus produtos e pedidos continuam salvos.
+      </p>
+      <Link href="/admin/assinatura" className="btn-primary mt-6">
+        Pagar mensalidade
+      </Link>
+    </div>
   );
 }

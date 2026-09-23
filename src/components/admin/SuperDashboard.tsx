@@ -3,6 +3,8 @@
 import { ExternalLink, KeyRound, Loader2, LogOut, Plus, Power, Store } from "lucide-react";
 import { useState } from "react";
 import { BRAND } from "@/lib/brand";
+import { billingState, formatYmd } from "@/lib/billing-state";
+import { PLANS, type PlanId } from "@/lib/plans";
 import { slugifyClient } from "./slug";
 import { api } from "./api";
 import { SuperAdmins, MyPassword } from "./SuperAdmins";
@@ -19,7 +21,30 @@ type Row = {
   owner_email: string | null;
   products: number;
   orders: number;
+  billing_mode: "manual" | "asaas";
+  plan: string;
+  trial_ends_at: string | null;
+  paid_until: string | null;
+  canceled_at: string | null;
 };
+
+function BillingBadge({ r }: { r: Row }) {
+  const st = billingState({ mode: r.billing_mode, plan: r.plan, trial_ends_at: r.trial_ends_at, paid_until: r.paid_until, canceled_at: r.canceled_at });
+  const map: Record<string, [string, string]> = {
+    manual: ["Cobrança manual", "bg-stone-100 text-stone-600"],
+    trial: [`Teste até ${"until" in st && st.until ? formatYmd(st.until) : ""}`, "bg-sky-100 text-sky-800"],
+    active: [`Em dia até ${"until" in st && st.until ? formatYmd(st.until) : ""}`, "bg-emerald-100 text-emerald-800"],
+    grace: ["Em atraso", "bg-amber-100 text-amber-800"],
+    locked: ["Pausada (sem pagamento)", "bg-red-100 text-red-800"],
+  };
+  const [label, cls] = map[st.kind];
+  return (
+    <span className={`rounded px-1.5 py-0.5 text-[11px] font-semibold ${cls}`}>
+      {label}
+      {r.billing_mode === "asaas" && r.canceled_at ? " · cancelada" : ""}
+    </span>
+  );
+}
 
 type AdminRow = { id: number; email: string; name: string; created_at: string };
 
@@ -33,7 +58,7 @@ export function SuperDashboard(props: { email: string; myId: number; initial: Ro
 
 function Inner({ email, myId, initial, admins }: { email: string; myId: number; initial: Row[]; admins: AdminRow[] }) {
   const [rows, setRows] = useState(initial);
-  const [form, setForm] = useState({ name: "", slug: "", owner_name: "", owner_email: "", owner_password: "", whatsapp: "", template: "blank" as "blank" | "pizzaria" });
+  const [form, setForm] = useState({ name: "", slug: "", owner_name: "", owner_email: "", owner_password: "", whatsapp: "", template: "blank" as "blank" | "pizzaria", plan: "profissional" as PlanId });
   const [slugTouched, setSlugTouched] = useState(false);
   const [busy, setBusy] = useState(false);
   const toast = useToast();
@@ -49,7 +74,7 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
     try {
       const r = await api<{ slug: string }>("/api/super/stores", "POST", form);
       toast("ok", `Loja criada: /${r.slug}`);
-      setForm({ name: "", slug: "", owner_name: "", owner_email: "", owner_password: "", whatsapp: "", template: "blank" });
+      setForm({ name: "", slug: "", owner_name: "", owner_email: "", owner_password: "", whatsapp: "", template: "blank", plan: "profissional" });
       setSlugTouched(false);
       await reload();
     } catch (err) {
@@ -63,6 +88,28 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
     if (!window.confirm(r.is_active ? `Desativar "${r.name}"? O cardápio sai do ar e o dono perde o acesso.` : `Reativar "${r.name}"?`)) return;
     try {
       await api(`/api/super/stores/${r.id}`, "PATCH", { is_active: !r.is_active });
+      await reload();
+    } catch (err) {
+      toast("error", err instanceof Error ? err.message : "Erro.");
+    }
+  }
+
+  async function changePlan(r: Row, plan: PlanId) {
+    if (!window.confirm(`Mudar "${r.name}" para o plano ${PLANS[plan].name}?${r.billing_mode === "asaas" ? " A mensalidade no Asaas também será ajustada." : ""}`)) return;
+    try {
+      await api(`/api/super/stores/${r.id}`, "PATCH", { plan });
+      toast("ok", "Plano alterado.");
+    } catch (err) {
+      toast("error", err instanceof Error ? err.message : "Erro.");
+    }
+    await reload();
+  }
+
+  async function makeManual(r: Row) {
+    if (!window.confirm(`Passar "${r.name}" para cobrança manual? A assinatura no Asaas será cancelada e a loja não será mais pausada automaticamente.`)) return;
+    try {
+      await api(`/api/super/stores/${r.id}`, "PATCH", { billing_mode: "manual" });
+      toast("ok", "Loja em cobrança manual.");
       await reload();
     } catch (err) {
       toast("error", err instanceof Error ? err.message : "Erro.");
@@ -143,6 +190,26 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
                       <p className="truncate text-xs text-stone-500">
                         /{r.slug} · {r.owner_email} · {r.products} produtos · {r.orders} pedidos
                       </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                        <BillingBadge r={r} />
+                        <select
+                          className="rounded border border-stone-200 bg-white px-1 py-0.5 text-[11px] font-semibold"
+                          value={r.plan}
+                          onChange={(e) => changePlan(r, e.target.value as PlanId)}
+                          aria-label="Plano"
+                        >
+                          {(Object.keys(PLANS) as PlanId[]).map((id) => (
+                            <option key={id} value={id}>
+                              {PLANS[id].name}
+                            </option>
+                          ))}
+                        </select>
+                        {r.billing_mode === "asaas" && (
+                          <button className="text-[11px] font-semibold text-stone-500 underline" onClick={() => makeManual(r)}>
+                            passar para cobrança manual
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <div className="flex gap-1">
                       <a href={`/${r.slug}`} target="_blank" className="btn-ghost px-2.5" title="Abrir cardápio">
@@ -191,6 +258,17 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
                   <option value="blank">Cardápio em branco</option>
                   <option value="pizzaria">Modelo de pizzaria (produtos de exemplo)</option>
                 </select>
+              </div>
+              <div>
+                <label className="label">Plano</label>
+                <select className="field" value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value as PlanId })}>
+                  {(Object.keys(PLANS) as PlanId[]).map((id) => (
+                    <option key={id} value={id}>
+                      {PLANS[id].name}
+                    </option>
+                  ))}
+                </select>
+                <p className="hint">Lojas cadastradas aqui ficam em cobrança manual: você recebe do cliente por fora.</p>
               </div>
               <button className="btn-primary w-full" disabled={busy}>
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />} Cadastrar loja

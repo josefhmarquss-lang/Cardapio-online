@@ -1,4 +1,5 @@
 import { clientIp, HttpError, json, rateLimit, readJson, route } from "@/lib/http";
+import { storeIsOperational } from "@/lib/repo/billing";
 import { createOrder } from "@/lib/repo/orders";
 import { getStoreBySlug } from "@/lib/repo/stores";
 import { orderSchema } from "@/lib/validation";
@@ -6,6 +7,7 @@ import { orderSchema } from "@/lib/validation";
 export const POST = route(async (req, ctx: RouteContext<"/api/public/stores/[slug]/orders">) => {
   const store = getStoreBySlug((await ctx.params).slug);
   if (!store || !store.is_active) throw new HttpError(404, "Estabelecimento não encontrado.");
+  if (!(await storeIsOperational(store.id))) throw new HttpError(409, "Este cardápio está temporariamente indisponível.");
   rateLimit(`order:${clientIp(req)}`, 12, 10 * 60_000);
   const input = orderSchema.parse(await readJson(req));
   const order = createOrder(store, input);

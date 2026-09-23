@@ -7,6 +7,7 @@ import { formatDateTime, formatPhone, formatTime, money, PAYMENT_LABEL, statusLa
 import type { Order, OrderStatus } from "@/lib/types";
 import { useOrderPulse } from "./AdminShell";
 import { api } from "./api";
+import { Onboarding, type OnboardingSteps } from "./Onboarding";
 import { Empty, PageHeader, useToast } from "./ui";
 
 type Filter = "active" | "finished" | "all";
@@ -32,11 +33,13 @@ export function OrdersBoard({
   stats,
   timezone,
   storeName,
+  onboarding,
 }: {
   initial: Order[];
   stats: { count: number; revenue: number; open: number };
   timezone: string;
   storeName: string;
+  onboarding: OnboardingSteps | null;
 }) {
   const [filter, setFilter] = useState<Filter>("active");
   const [orders, setOrders] = useState(initial);
@@ -95,6 +98,7 @@ export function OrdersBoard({
 
   return (
     <div>
+      {onboarding && <Onboarding steps={onboarding} />}
       <PageHeader title="Pedidos" description="Os pedidos feitos no cardápio aparecem aqui automaticamente.">
         <button className="btn-outline" onClick={() => load()} disabled={loading}>
           <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} /> Atualizar

@@ -85,6 +85,47 @@ gerada e mostrada **uma única vez** no terminal. Para redefinir, rode
 Tudo é salvo no banco e aparece no cardápio público na hora (as páginas são
 renderizadas a cada acesso).
 
+## Assinatura automática (Asaas)
+
+Além do cadastro manual em `/super`, o sistema tem **cadastro automático**: a pessoa
+entra em `/assinar`, escolhe o plano, cria a loja e já cai no painel. As mensalidades
+são cobradas pelo **Asaas** (Pix, boleto ou cartão) e o dinheiro cai na sua conta Asaas.
+As duas formas funcionam juntas.
+
+**Como funciona**
+- Planos e preços: `src/lib/plans.ts` (Essencial R$ 79,90 até 60 produtos; Profissional R$ 139,90).
+- `TRIAL_DAYS` dias grátis (padrão 7). A 1ª mensalidade vence no fim do teste.
+- A cada mês o Asaas gera a fatura e avisa o cliente por e-mail. No painel, em
+  **Assinatura**, o lojista vê a fatura, paga, muda de plano ou cancela.
+- Pagou: acesso até o vencimento + 1 mês. Venceu: 3 dias de tolerância com aviso; depois o
+  cardápio e o painel são **pausados** (dados preservados) até o pagamento.
+- Lojas criadas em `/super` ficam em **cobrança manual** (nunca são pausadas
+  automaticamente). Em `/super` você também troca o plano de qualquer loja ou passa uma
+  loja do Asaas para cobrança manual (isso cancela a assinatura no Asaas).
+
+**Configuração (Railway → Variables)**
+```
+ASAAS_API_KEY=$aact_...        # chave de API (Asaas → Integrações)
+ASAAS_ENV=sandbox              # production quando for para valer
+ASAAS_WEBHOOK_TOKEN=...        # um texto secreto longo, inventado por você
+```
+
+**Webhook (recomendado)** — no painel do Asaas: Integrações → Webhooks → adicionar:
+- URL: `https://SEU-DOMINIO/api/webhooks/asaas`
+- Token de autenticação: o mesmo de `ASAAS_WEBHOOK_TOKEN`
+- Eventos: os de **cobranças/pagamentos**
+Com o webhook, a loja é liberada segundos após o pagamento. Sem ele, o sistema consulta o
+Asaas sozinho (no máximo a cada 10 minutos, e na hora quando o lojista clica em "Já paguei").
+O conteúdo do aviso nunca é usado diretamente: o sistema sempre confere no Asaas.
+
+**Enquanto `ASAAS_ENV=sandbox`**, a página de vendas continua com "Falar com a gente" e o
+cadastro fica acessível só pelo link direto `/assinar` (com um aviso de ambiente de teste). Com
+`ASAAS_ENV=production`, os botões "Testar 7 dias grátis" aparecem na página de vendas.
+
+**Testes sem dinheiro real**: use `ASAAS_ENV=sandbox` com a chave de uma conta criada em
+sandbox.asaas.com. Lá dá para simular o pagamento das faturas. Para ir para produção, troque
+a chave pela da conta real aprovada e mude `ASAAS_ENV=production`.
+
 ## Pedidos, WhatsApp e pagamento — como funciona de verdade
 
 1. O consumidor monta o carrinho e finaliza. O **servidor recalcula todos os preços,
@@ -181,6 +222,10 @@ o pedido aparece no painel certo e muda de status; o consumidor vê o novo statu
 a outra loja tenta ler e alterar pedidos, produtos e imagens da pizzaria (tudo negado),
 além de chamadas sem login e de outro site. Precisa do Playwright com Chromium
 (`npx playwright install chromium`; ou defina `CHROMIUM_PATH`).
+
+Assinatura automática (com um simulador do Asaas, sem internet): suba o app com
+`ASAAS_ENV=production ASAAS_API_URL=http://localhost:3999/v3 ASAAS_API_KEY=fake-key ASAAS_WEBHOOK_TOKEN=wh-token`
+e rode `DATABASE_PATH=<mesmo banco> npm run test:billing`.
 
 Outros comandos: `npm run typecheck`, `npm run lint`.
 

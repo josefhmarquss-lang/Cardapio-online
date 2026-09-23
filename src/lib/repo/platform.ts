@@ -13,17 +13,31 @@ export type NewStoreInput = {
   owner_password: string;
   whatsapp?: string;
   template: "blank" | "pizzaria";
+  /** Assinatura: sem isto a loja fica em cobrança manual. */
+  billing?: {
+    mode: "manual" | "asaas";
+    plan: string;
+    trial_ends_at?: string | null;
+    asaas_customer_id?: string | null;
+    asaas_subscription_id?: string | null;
+  };
 };
 
-/** Cadastra um estabelecimento e a conta do dono (usado pelo superadmin e pelo seed). */
-export function createStoreWithOwner(input: NewStoreInput): { storeId: number; slug: string } {
-  const slug = slugify(input.slug || input.name);
+/** Confere se o endereço da loja e o e-mail estão livres. Retorna o endereço normalizado. */
+export function checkAvailability(nameOrSlug: string, email: string): string {
+  const slug = slugify(nameOrSlug);
   if (slug.length < 3) throw new HttpError(400, "Endereço (slug) muito curto.");
   if (RESERVED_SLUGS.has(slug)) throw new HttpError(400, "Este endereço é reservado. Escolha outro.");
   const d = db();
-  if (d.prepare("SELECT 1 FROM stores WHERE slug = ?").get(slug)) throw new HttpError(409, "Já existe uma loja com este endereço.");
-  if (d.prepare("SELECT 1 FROM users WHERE email = ?").get(input.owner_email.trim()))
-    throw new HttpError(409, "Já existe uma conta com este e-mail.");
+  if (d.prepare("SELECT 1 FROM stores WHERE slug = ?").get(slug)) throw new HttpError(409, "Já existe uma loja com este endereço. Escolha outro.");
+  if (d.prepare("SELECT 1 FROM users WHERE email = ?").get(email.trim())) throw new HttpError(409, "Já existe uma conta com este e-mail.");
+  return slug;
+}
+
+/** Cadastra um estabelecimento e a conta do dono (usado pelo superadmin, pelo seed e pelo cadastro automático). */
+export function createStoreWithOwner(input: NewStoreInput): { storeId: number; slug: string } {
+  const slug = checkAvailability(input.slug || input.name, input.owner_email);
+  const d = db();
   const hash = bcrypt.hashSync(input.owner_password, 12);
 
   return d.transaction(() => {
@@ -49,6 +63,13 @@ export function createStoreWithOwner(input: NewStoreInput): { storeId: number; s
       });
     }
     if (input.whatsapp) updateStore(storeId, { whatsapp: input.whatsapp });
+    if (input.billing) {
+      const b = input.billing;
+      d.prepare(
+        `INSERT INTO store_billing (store_id, mode, plan, trial_ends_at, asaas_customer_id, asaas_subscription_id)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+      ).run(storeId, b.mode, b.plan, b.trial_ends_at ?? null, b.asaas_customer_id ?? null, b.asaas_subscription_id ?? null);
+    }
     return { storeId, slug };
   })();
 }
@@ -86,8 +107,10 @@ export function listStoresOverview() {
       `SELECT s.id, s.slug, s.name, s.is_active, s.created_at, s.logo_url, s.primary_color,
               (SELECT email FROM users u WHERE u.store_id = s.id AND u.role = 'owner' ORDER BY u.id LIMIT 1) AS owner_email,
               (SELECT COUNT(*) FROM products p WHERE p.store_id = s.id) AS products,
-              (SELECT COUNT(*) FROM orders o WHERE o.store_id = s.id) AS orders
-         FROM stores s ORDER BY s.id DESC`,
+              (SELECT COUNT(*) FROM orders o WHERE o.store_id = s.id) AS orders,
+              COALESCE(b.mode, 'manual') AS billing_mode, COALESCE(b.plan, 'profissional') AS plan,
+              b.trial_ends_at, b.paid_until, b.canceled_at
+         FROM stores s LEFT JOIN store_billing b ON b.store_id = s.id ORDER BY s.id DESC`,
     )
     .all() as {
     id: number;
@@ -100,6 +123,11 @@ export function listStoresOverview() {
     owner_email: string | null;
     products: number;
     orders: number;
+    billing_mode: "manual" | "asaas";
+    plan: string;
+    trial_ends_at: string | null;
+    paid_until: string | null;
+    canceled_at: string | null;
   }[];
 }
 
