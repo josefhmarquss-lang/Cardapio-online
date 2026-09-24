@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SignupForm } from "@/components/SignupForm";
-import { asaasConfigured } from "@/lib/asaas";
+import { asaasConfigured, asaasProduction } from "@/lib/asaas";
 import { BRAND } from "@/lib/brand";
 import { whatsappNumber } from "@/lib/format";
 import { addDays, formatYmd, todayYmd } from "@/lib/billing-state";
@@ -16,7 +16,7 @@ export default async function SignupPage(props: PageProps<"/assinar">) {
 
   return (
     <div className="min-h-dvh bg-stone-50">
-      {asaasConfigured() && process.env.ASAAS_ENV !== "production" && (
+      {asaasConfigured() && !asaasProduction() && (
         <div className="bg-amber-400 px-4 py-2 text-center text-sm font-bold text-amber-950">
           Ambiente de teste (sandbox do Asaas): os pagamentos não são reais.
         </div>

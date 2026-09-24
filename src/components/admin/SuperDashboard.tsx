@@ -48,7 +48,9 @@ function BillingBadge({ r }: { r: Row }) {
 
 type AdminRow = { id: number; email: string; name: string; created_at: string };
 
-export function SuperDashboard(props: { email: string; myId: number; initial: Row[]; admins: AdminRow[] }) {
+type Payments = { status: "production" | "sandbox" | "off"; homeButtons: boolean };
+
+export function SuperDashboard(props: { email: string; myId: number; initial: Row[]; admins: AdminRow[]; payments: Payments }) {
   return (
     <ToastProvider>
       <Inner {...props} />
@@ -56,7 +58,7 @@ export function SuperDashboard(props: { email: string; myId: number; initial: Ro
   );
 }
 
-function Inner({ email, myId, initial, admins }: { email: string; myId: number; initial: Row[]; admins: AdminRow[] }) {
+function Inner({ email, myId, initial, admins, payments }: { email: string; myId: number; initial: Row[]; admins: AdminRow[]; payments: Payments }) {
   const [rows, setRows] = useState(initial);
   const [form, setForm] = useState({ name: "", slug: "", owner_name: "", owner_email: "", owner_password: "", whatsapp: "", template: "blank" as "blank" | "pizzaria", plan: "profissional" as PlanId });
   const [slugTouched, setSlugTouched] = useState(false);
@@ -182,6 +184,20 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
       </header>
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <PageHeader title="Estabelecimentos" description="Cadastre clientes e entregue o acesso ao painel de cada loja." />
+        <div
+          className={`mb-6 rounded-2xl border px-4 py-3 text-sm ${
+            payments.status === "production" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : payments.status === "sandbox" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-stone-200 bg-white text-stone-700"
+          }`}
+        >
+          <strong>Cobrança automática (Asaas): </strong>
+          {payments.status === "production" && "ativa — pagamentos reais."}
+          {payments.status === "sandbox" && "modo teste (sandbox) — pagamentos de mentira."}
+          {payments.status === "off" && "desligada — só cadastro manual."}{" "}
+          {payments.status !== "off" &&
+            (payments.homeButtons
+              ? "Os botões dos planos na página inicial levam para /assinar."
+              : "Os botões dos planos na página inicial continuam em “Falar com a gente”.")}
+        </div>
         <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
           <div className="card overflow-hidden">
             {rows.length === 0 ? (

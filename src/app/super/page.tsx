@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SuperDashboard } from "@/components/admin/SuperDashboard";
+import { asaasLive, asaasStatus } from "@/lib/asaas";
 import { requireSuperadminPage } from "@/lib/auth";
 import { listStoresOverview, listSuperadmins } from "@/lib/repo/platform";
 
@@ -8,5 +9,5 @@ export const dynamic = "force-dynamic";
 
 export default async function SuperPage() {
   const user = await requireSuperadminPage();
-  return <SuperDashboard email={user.email} myId={user.id} initial={listStoresOverview()} admins={listSuperadmins()} />;
+  return <SuperDashboard email={user.email} myId={user.id} initial={listStoresOverview()} admins={listSuperadmins()} payments={{ status: asaasStatus(), homeButtons: asaasLive() }} />;
 }

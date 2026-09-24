@@ -7,8 +7,23 @@ import { HttpError } from "./errors";
  *   ASAAS_ENV=production -> https://api.asaas.com/v3
  */
 
+/** Lê variáveis tolerando espaços e aspas coladas por engano no painel. */
+function env(name: string): string {
+  return (process.env[name] || "").trim().replace(/^["']+|["']+$/g, "").trim();
+}
+
+export function asaasProduction(): boolean {
+  return env("ASAAS_ENV").toLowerCase() === "production";
+}
+
 export function asaasConfigured(): boolean {
-  return !!process.env.ASAAS_API_KEY;
+  return !!env("ASAAS_API_KEY");
+}
+
+/** Estado da cobrança automática (para o painel /super). */
+export function asaasStatus(): "production" | "sandbox" | "off" {
+  if (!asaasConfigured()) return "off";
+  return asaasProduction() ? "production" : "sandbox";
 }
 
 /**
@@ -16,18 +31,18 @@ export function asaasConfigured(): boolean {
  * (ASAAS_ENV=production) ou quando SHOW_SIGNUP=true força os botões (ex.: para testes).
  */
 export function asaasLive(): boolean {
-  return asaasConfigured() && (process.env.ASAAS_ENV === "production" || process.env.SHOW_SIGNUP === "true");
+  return asaasConfigured() && (asaasProduction() || env("SHOW_SIGNUP").toLowerCase() === "true");
 }
 
 function baseUrl() {
-  if (process.env.ASAAS_API_URL) return process.env.ASAAS_API_URL.replace(/\/$/, "");
-  return process.env.ASAAS_ENV === "production" ? "https://api.asaas.com/v3" : "https://api-sandbox.asaas.com/v3";
+  if (env("ASAAS_API_URL")) return env("ASAAS_API_URL").replace(/\/$/, "");
+  return asaasProduction() ? "https://api.asaas.com/v3" : "https://api-sandbox.asaas.com/v3";
 }
 
 type AsaasError = { errors?: { code?: string; description?: string }[] };
 
 async function call<T>(method: string, path: string, body?: unknown): Promise<T> {
-  const key = process.env.ASAAS_API_KEY;
+  const key = env("ASAAS_API_KEY");
   if (!key) throw new HttpError(503, "Pagamentos não configurados. Fale com o suporte.");
   let res: Response;
   try {
