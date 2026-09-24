@@ -93,7 +93,7 @@ são cobradas pelo **Asaas** (Pix, boleto ou cartão) e o dinheiro cai na sua co
 As duas formas funcionam juntas.
 
 **Como funciona**
-- Planos e preços: `src/lib/plans.ts` (Essencial R$ 59,90 até 60 produtos; Profissional R$ 79,90).
+- Planos e preços: `src/lib/plans.ts` (Essencial R$ 59,90 até 15 produtos; Profissional R$ 79,90).
 - `TRIAL_DAYS` dias grátis (padrão 3). A 1ª mensalidade vence no fim do teste.
 - A cada mês o Asaas gera a fatura e avisa o cliente por e-mail. No painel, em
   **Assinatura**, o lojista vê a fatura, paga, muda de plano ou cancela.

@@ -18,7 +18,7 @@ export const BRAND = {
       price: price(PLANS.essencial.price_cents),
       period: "/mês",
       description: "Para começar a vender online.",
-      features: ["Cardápio com sua marca", "Pedidos pelo WhatsApp", "Até 60 produtos", "Painel de pedidos"],
+      features: ["Cardápio com sua marca", "Pedidos pelo WhatsApp", `Até ${PLANS.essencial.max_products} produtos`, "Painel de pedidos"],
       highlight: false,
     },
     {

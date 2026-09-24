@@ -2,7 +2,7 @@
 export type PlanId = "essencial" | "profissional";
 
 export const PLANS: Record<PlanId, { id: PlanId; name: string; price_cents: number; max_products: number | null }> = {
-  essencial: { id: "essencial", name: "Essencial", price_cents: 5990, max_products: 60 },
+  essencial: { id: "essencial", name: "Essencial", price_cents: 5990, max_products: 15 },
   profissional: { id: "profissional", name: "Profissional", price_cents: 7990, max_products: null },
 };
 
