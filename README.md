@@ -93,7 +93,7 @@ são cobradas pelo **Asaas** (Pix, boleto ou cartão) e o dinheiro cai na sua co
 As duas formas funcionam juntas.
 
 **Como funciona**
-- Planos e preços: `src/lib/plans.ts` (Essencial R$ 79,90 até 60 produtos; Profissional R$ 139,90).
+- Planos e preços: `src/lib/plans.ts` (Essencial R$ 59,90 até 60 produtos; Profissional R$ 79,90).
 - `TRIAL_DAYS` dias grátis (padrão 3). A 1ª mensalidade vence no fim do teste.
 - A cada mês o Asaas gera a fatura e avisa o cliente por e-mail. No painel, em
   **Assinatura**, o lojista vê a fatura, paga, muda de plano ou cancela.
@@ -204,7 +204,7 @@ não estão incluídos.
 ## Personalizar o SEU produto
 
 - Nome, sigla, slogan e **planos/preços** da página comercial:
-  `src/lib/brand.ts` (Essencial R$ 79,90/mês, Profissional R$ 139,90/mês, Redes sob consulta).
+  `src/lib/brand.ts` (Essencial R$ 59,90/mês, Profissional R$ 79,90/mês, Redes sob consulta).
 - WhatsApp comercial: `NEXT_PUBLIC_SALES_WHATSAPP` no `.env` (depois rode o build de novo).
 - Conteúdo da pizzaria demo: `src/lib/demo-data.ts`. Ilustrações: `npm run art`
   regera os SVGs em `public/demo/`.

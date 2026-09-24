@@ -59,7 +59,7 @@ try {
   const sub = fake.state.subscriptions.at(-1);
   const due = new Date(Date.now() - 3 * 3600_000 + 3 * 86400_000).toISOString().slice(0, 10);
   check(cust?.cpfCnpj === "52998224725" && cust?.email === email, "cliente criado no Asaas com CPF e e-mail");
-  check(sub?.value === 79.9 && sub?.nextDueDate === due && sub?.billingType === "UNDEFINED", `assinatura R$ 79,90 com 1º vencimento em ${due}`);
+  check(sub?.value === 59.9 && sub?.nextDueDate === due && sub?.billingType === "UNDEFINED", `assinatura R$ 59,90 com 1º vencimento em ${due}`);
   check(fake.state.requests.every((r) => r.path.startsWith("/__") || r.ua), "todas as chamadas enviam User-Agent");
 
   // ---------- tela de assinatura ----------
@@ -80,8 +80,8 @@ try {
   const r61 = await req.post(BASE + "/api/admin/products", { data: { category_id: cat.category.id, name: "Pizza 61", price_cents: 1000, image_url: null }, ...H });
   check(created === 60 && r61.status() === 403, `Essencial: 60 produtos aceitos, o 61º recusado (${r61.status()})`);
   const downg = await req.post(BASE + "/api/admin/billing/plan", { data: { plan: "profissional" }, ...H });
-  check(downg.ok() && fake.state.subscriptions.at(-1).value === 139.9, "troca para Profissional atualiza a assinatura para R$ 139,90");
-  check(fake.state.payments.filter((x) => x.subscription === sub.id && x.status === "PENDING").every((x) => x.value === 139.9), "fatura em aberto também passou para R$ 139,90");
+  check(downg.ok() && fake.state.subscriptions.at(-1).value === 79.9, "troca para Profissional atualiza a assinatura para R$ 79,90");
+  check(fake.state.payments.filter((x) => x.subscription === sub.id && x.status === "PENDING").every((x) => x.value === 79.9), "fatura em aberto também passou para R$ 79,90");
   const r61b = await req.post(BASE + "/api/admin/products", { data: { category_id: cat.category.id, name: "Pizza 61", price_cents: 1000, image_url: null }, ...H });
   check(r61b.ok(), "no Profissional o 61º produto é aceito");
   const back = await req.post(BASE + "/api/admin/billing/plan", { data: { plan: "essencial" }, ...H });
