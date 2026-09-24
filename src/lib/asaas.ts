@@ -11,9 +11,12 @@ export function asaasConfigured(): boolean {
   return !!process.env.ASAAS_API_KEY;
 }
 
-/** Cobrança real ligada: só então a página de vendas divulga o cadastro automático. */
+/**
+ * A página de vendas divulga o cadastro automático quando a cobrança real está ligada
+ * (ASAAS_ENV=production) ou quando SHOW_SIGNUP=true força os botões (ex.: para testes).
+ */
 export function asaasLive(): boolean {
-  return asaasConfigured() && process.env.ASAAS_ENV === "production";
+  return asaasConfigured() && (process.env.ASAAS_ENV === "production" || process.env.SHOW_SIGNUP === "true");
 }
 
 function baseUrl() {

@@ -121,6 +121,8 @@ O conteúdo do aviso nunca é usado diretamente: o sistema sempre confere no Asa
 **Enquanto `ASAAS_ENV=sandbox`**, a página de vendas continua com "Falar com a gente" e o
 cadastro fica acessível só pelo link direto `/assinar` (com um aviso de ambiente de teste). Com
 `ASAAS_ENV=production`, os botões "Testar 3 dias grátis" aparecem na página de vendas.
+Para ligar os botões antes disso (por sua conta e risco, ainda com pagamentos de teste),
+crie a variável `SHOW_SIGNUP=true`.
 
 **Testes sem dinheiro real**: use `ASAAS_ENV=sandbox` com a chave de uma conta criada em
 sandbox.asaas.com. Lá dá para simular o pagamento das faturas. Para ir para produção, troque
