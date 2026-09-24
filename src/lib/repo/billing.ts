@@ -257,3 +257,20 @@ export async function handleAsaasEvent(body: { event?: string; payment?: { subsc
   const row = db().prepare("SELECT store_id FROM store_billing WHERE asaas_subscription_id = ?").get(subId) as { store_id: number } | undefined;
   if (row) await syncBilling(row.store_id);
 }
+
+/**
+ * Exclui de vez uma loja desativada e tudo dela (conta do dono, produtos, pedidos,
+ * imagens e assinatura). Cancela a assinatura no Asaas, se ainda houver.
+ */
+export async function deleteStorePermanently(storeId: number) {
+  const d = db();
+  const row = d.prepare("SELECT is_active FROM stores WHERE id = ?").get(storeId) as { is_active: number } | undefined;
+  if (!row) throw new HttpError(404, "Loja não encontrada.");
+  if (row.is_active) throw new HttpError(409, "Desative a loja antes de excluir.");
+  const b = getBilling(storeId);
+  if (b.mode === "asaas" && b.asaas_subscription_id && !b.canceled_at && asaasConfigured()) {
+    await asaas.deleteSubscription(b.asaas_subscription_id).catch((e) => console.error("[excluir loja] cancelar assinatura", e));
+  }
+  // as tabelas ligadas à loja são apagadas junto (ON DELETE CASCADE)
+  d.prepare("DELETE FROM stores WHERE id = ?").run(storeId);
+}

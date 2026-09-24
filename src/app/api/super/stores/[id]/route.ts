@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { requireSuperadmin } from "@/lib/auth";
 import { HttpError, json, readJson, route } from "@/lib/http";
-import { changePlan, setManualBilling } from "@/lib/repo/billing";
+import { changePlan, deleteStorePermanently, setManualBilling } from "@/lib/repo/billing";
 import { resetOwnerPassword, setStoreActive } from "@/lib/repo/platform";
 import { passwordSchema } from "@/lib/validation";
 
@@ -21,5 +21,14 @@ export const PATCH = route(async (req, ctx: RouteContext<"/api/super/stores/[id]
   if (body.new_password) resetOwnerPassword(id, body.new_password);
   if (body.plan) await changePlan(id, body.plan);
   if (body.billing_mode === "manual") await setManualBilling(id);
+  return json({ ok: true });
+});
+
+/** Exclusão definitiva (só para lojas desativadas). */
+export const DELETE = route(async (_req, ctx: RouteContext<"/api/super/stores/[id]">) => {
+  await requireSuperadmin();
+  const id = Number((await ctx.params).id);
+  if (!Number.isInteger(id) || id <= 0) throw new HttpError(400, "ID inválido.");
+  await deleteStorePermanently(id);
   return json({ ok: true });
 });

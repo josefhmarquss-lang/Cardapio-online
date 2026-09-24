@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, KeyRound, Loader2, LogOut, Plus, Power, Store } from "lucide-react";
+import { ExternalLink, KeyRound, Loader2, LogOut, Plus, Power, Store, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { BRAND } from "@/lib/brand";
 import { billingState, formatYmd } from "@/lib/billing-state";
@@ -116,6 +116,21 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
     }
   }
 
+  async function removeStore(r: Row) {
+    const typed = window.prompt(
+      `Excluir DEFINITIVAMENTE "${r.name}"?\n\nApaga a conta do dono, produtos, fotos, pedidos e a assinatura. Não dá para desfazer.\n\nPara confirmar, digite o endereço da loja: ${r.slug}`,
+    );
+    if (typed === null) return;
+    if (typed.trim() !== r.slug) return toast("error", "O endereço digitado não confere. Nada foi excluído.");
+    try {
+      await api(`/api/super/stores/${r.id}`, "DELETE");
+      toast("ok", "Loja excluída.");
+      await reload();
+    } catch (err) {
+      toast("error", err instanceof Error ? err.message : "Erro.");
+    }
+  }
+
   async function resetPassword(r: Row) {
     const pwd = window.prompt(`Nova senha para ${r.owner_email} (mín. 8 caracteres):`);
     if (!pwd) return;
@@ -221,6 +236,11 @@ function Inner({ email, myId, initial, admins }: { email: string; myId: number; 
                       <button className={`btn-ghost px-2.5 ${r.is_active ? "text-red-600" : "text-emerald-600"}`} onClick={() => toggle(r)} title={r.is_active ? "Desativar" : "Reativar"}>
                         <Power className="size-4" />
                       </button>
+                      {!r.is_active && (
+                        <button className="btn-ghost px-2.5 text-red-700 hover:bg-red-50" onClick={() => removeStore(r)} title="Excluir definitivamente">
+                          <Trash2 className="size-4" />
+                        </button>
+                      )}
                     </div>
                   </li>
                 ))}
