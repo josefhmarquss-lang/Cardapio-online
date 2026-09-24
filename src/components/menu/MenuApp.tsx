@@ -6,6 +6,7 @@ import { money } from "@/lib/format";
 import { isOpenNow, todayHoursLabel } from "@/lib/hours";
 import type { Product } from "@/lib/types";
 import { CartSheet } from "./CartSheet";
+import { ActiveOrderBanner, MyOrdersButton, useMyOrders } from "./MyOrders";
 import { hasPriceVariation, lineKey, minPrice, sanitizeCart, unitPrice } from "./cart-utils";
 import { ProductSheet } from "./ProductSheet";
 import { StoreInfoSheet } from "./StoreInfoSheet";
@@ -24,6 +25,7 @@ export function MenuApp({ store, menu, initialOpen, preview = false }: { store: 
   const [activeCat, setActiveCat] = useState<number | null>(menu[0]?.id ?? null);
   const [toast, setToast] = useState("");
   const cartKey = `carrinho:${store.slug}`;
+  const myOrders = useMyOrders(store.slug);
 
   // carrinho salvo no aparelho
   useEffect(() => {
@@ -211,6 +213,7 @@ export function MenuApp({ store, menu, initialOpen, preview = false }: { store: 
             </div>
           ) : (
             <>
+              <MyOrdersButton slug={store.slug} orders={myOrders.orders} activeCount={myOrders.active.length} timezone={store.timezone} />
               <button onClick={() => setSearching(true)} className="grid size-9 shrink-0 place-items-center rounded-full bg-card ring-1 ring-line" aria-label="Buscar">
                 <Search className="size-4" />
               </button>
@@ -284,6 +287,13 @@ export function MenuApp({ store, menu, initialOpen, preview = false }: { store: 
           <p className="mt-1">Pedidos confirmados diretamente pelo estabelecimento.</p>
         </footer>
       </main>
+
+      {/* ---------- pedido em andamento ---------- */}
+      {count === 0 && !cartOpen && myOrders.active[0] && (
+        <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <ActiveOrderBanner slug={store.slug} order={myOrders.active[0]} />
+        </div>
+      )}
 
       {/* ---------- barra do carrinho ---------- */}
       {count > 0 && (

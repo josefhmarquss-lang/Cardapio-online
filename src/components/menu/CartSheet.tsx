@@ -8,6 +8,7 @@ import type { Fulfillment, Order, PaymentMethod, Product } from "@/lib/types";
 import { Sheet } from "@/components/ui/Sheet";
 import { optionLabels, unitPrice } from "./cart-utils";
 import { PixBox, PixLogo } from "./PixBox";
+import { rememberOrder } from "./MyOrders";
 import { ReceiptButton } from "./ReceiptButton";
 import type { CartLine, PublicStore } from "./types";
 
@@ -274,6 +275,7 @@ function Checkout({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Não foi possível enviar o pedido.");
+      rememberOrder(store.slug, (data.full as Order).public_token);
       onPlaced(data.full as Order);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Falha de conexão. Tente novamente.");

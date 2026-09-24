@@ -158,6 +158,13 @@ log("status atualizado para Recebido");
 await cp.goto(BASE + trackHref);
 await cp.waitForSelector("text=Recebido");
 log("cliente vê status 'Recebido' na página de acompanhamento");
+await cp.goto(BASE + "/brasa-e-massa", { waitUntil: "networkidle" });
+await cp.waitForSelector("text=/Pedido #\\d+: Recebido/");
+await cp.getByRole("button", { name: "Meus pedidos" }).click();
+const myList = await cp.getByRole("dialog").innerText();
+log("'Meus pedidos' no cardápio mostra o pedido como Recebido =", /#\d+[\s\S]*Recebido/.test(myList));
+await cp.screenshot({ path: SP + "/e-meus-pedidos.png" });
+await cp.keyboard.press("Escape");
 
 // ---------- 6) isolamento: o outro estabelecimento ----------
 const otherCtx = await b.newContext({ viewport: { width: 1280, height: 860 } });
